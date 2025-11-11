@@ -7,7 +7,7 @@ async function bootstrap() {
 
   // 1. React 앱의 주소 (http://localhost:5173)를 허용하는 CORS 설정
   app.enableCors({
-    origin: 'http://localhost:5173', 
+    origin: '*', 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
