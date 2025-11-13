@@ -55,6 +55,7 @@ jobs:
             echo "--- Navigating to deployment directory (Project Root) ---"
             # docker-compose.yml이 위치한 프로젝트 루트 디렉토리로 이동
             cd ${{ secrets.VM_TARGET_DIR }} 
+            cd ..
 
             # ========== 백엔드 (NestJS) 배포 시작 ==========
             
