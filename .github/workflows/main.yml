@@ -1,0 +1,84 @@
+name: Deploy React Frontend to GCP VM
+
+# 1. 워크플로우 실행 조건 정의
+on:
+  push:
+    branches:
+      - main
+      - proto
+    paths:
+      - '**'
+
+  # 💡 수동 실행(Manual Trigger) 옵션 추가 
+  workflow_dispatch: {}
+      
+# 2. 실행될 작업(Job) 정의
+jobs:
+  deploy:
+    # 이 작업이 실행될 가상 환경 정의 (GitHub Runner)
+    runs-on: ubuntu-latest
+
+    # 3. 작업의 단계(Steps) 정의
+    steps:
+      # Git 레포지토리의 코드를 Runner 환경으로 복제합니다.
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      # 1단계: SSH 키 설정
+      # GitHub Secret에 저장된 비공개 키를 사용하여 VM 접속 준비를 합니다.
+      - name: Setup SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          # SSH_PRIVATE_KEY Secret (개인 키 파일 내용) 사용
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # 2단계: SSH를 통해 VM으로 파일 전송 (rsync 사용)
+      - name: Transfer Files to VM
+        run: |
+          # SSH 접속 시 보안 경고를 무시하도록 VM_HOST_IP를 known_hosts에 등록
+          ssh-keyscan -H ${{ secrets.VM_HOST_IP }} >> ~/.ssh/known_hosts
+          
+          # rsync 명령으로 Runner의 코드를 VM의 목표 디렉토리로 동기화합니다.
+          rsync -avz --delete --exclude 'node_modules' --exclude 'dist' ./ ${{ secrets.VM_USER }}@${{ secrets.VM_HOST_IP }}:${{ secrets.VM_TARGET_DIR }}
+        
+      # 3단계: SSH를 통해 Docker Compose 명령 실행
+      # appleboy/ssh-action 액션을 사용하여 VM에서 명령어를 실행합니다.
+      - name: Deploy and Restart Backend/Frontend Containers
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST_IP }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # -----------------------------------------------
+          # ⚠️ 수정된 스크립트 내용
+          script: |
+            echo "--- Navigating to deployment directory (Project Root) ---"
+            # docker-compose.yml이 위치한 프로젝트 루트 디렉토리로 이동
+            cd ${{ secrets.VM_TARGET_DIR }} 
+            cd ..
+
+            # ========== 백엔드 (NestJS) 배포 시작 ==========
+            
+            # 1. Backend 이미지 빌드 (siksa-backend-app)
+            echo "--- Building Backend Production Code (siksa-backend-app) ---"
+            /usr/local/bin/docker-compose build siksa-backend-app
+            
+            # 2. Backend 컨테이너 재시작
+            echo "--- Restarting Backend Container ---"
+            # 새로 빌드된 이미지를 사용하도록 컨테이너 강제 재시작
+            /usr/local/bin/docker-compose up -d --force-recreate siksa-backend-app
+            
+            # ========== 프론트엔드 (React) 배포 시작 ==========
+            
+            # 3. Frontend 이미지 빌드 (API URL 인자 전달)
+            echo "--- Building new Frontend image (frontend-app) ---"
+            /usr/local/bin/docker-compose build --no-cache \
+              --build-arg VITE_API_BASE_URL="${{ secrets.VITE_FRONTEND_API_BASE_URL }}" frontend-app
+              
+            # 4. Frontend 컨테이너 재시작
+            echo "--- Restarting Frontend Container ---"
+            # 백엔드에 의존하지만, 이미 백엔드가 재시작되었으므로 --no-deps는 유지
+            /usr/local/bin/docker-compose up -d --no-deps --force-recreate frontend-app
+            
+            echo "--- Deployment complete on ${{ secrets.VM_HOST_IP }} ---"
+          # -----------------------------------------------
