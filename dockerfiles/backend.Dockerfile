@@ -4,11 +4,11 @@ FROM node:lts-alpine as builder
 WORKDIR /app
 
 # package.json 파일 복사 (Docker Compose context가 . 이므로, 경로 명시)
-COPY ./siksa-back/package*.json ./
+COPY ./package*.json ./
 RUN npm install
 
 # 나머지 NestJS 소스 코드 복사 (context가 . 이므로, 경로 명시)
-COPY ./siksa-back/. . 
+COPY . . 
 
 # NestJS 프로덕션 빌드 (TypeScript를 JavaScript로 변환)
 RUN npm run build 
