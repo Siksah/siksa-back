@@ -47,7 +47,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST_IP }}
-          username: ${{ secrets.VM_USERNAME }}
+          username: ${{ secrets.VM_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             echo "--- Navigating to deployment directory ---"
