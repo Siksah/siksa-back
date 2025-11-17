@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GeminiAiModule } from './gemini-ai/gemini-ai.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { GeminiAiModule } from './gemini-ai/gemini-ai.module';
       inject: [ConfigService], // ConfigService 주입
     }),
 
-    GeminiAiModule,
+    CommonModule,
   ],
 
   controllers: [AppController],
