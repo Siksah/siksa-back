@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AnswerModule } from './answer/answer.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -18,12 +18,11 @@ import { AnswerModule } from './answer/answer.module';
       useFactory: async (configService: ConfigService) => ({
         // .env 파일의 DATABASE_URL 값을 가져와서 사용
         // 💡 MongoDB 연결 문자열 (로컬 MongoDB가 실행 중이어야 합니다)
-        uri: configService.get<string>('MONGO_URI'), 
+        uri: configService.get<string>('MONGO_URI'),
       }),
       inject: [ConfigService], // ConfigService 주입
     }),
-    AnswerModule,
-
+    CommonModule,
   ],
 
   controllers: [AppController],
