@@ -32,7 +32,6 @@ function applyModelDefaults(reqType: string, dto: GenerateTextDto) {
         thinkingConfig: {
           thinkingLevel: thinkingLevel,
         },
-        temperature: temperature,
       }
     } else if (model === 'gemini-2.5-pro') {
       if (thinkingBudget != -1 && (thinkingBudget < 128 || thinkingBudget > 32768)) {
