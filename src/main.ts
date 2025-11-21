@@ -5,9 +5,15 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 1. React 앱의 주소 (http://localhost:5173)를 허용하는 CORS 설정
+  // 1. React 앱의 주소 를 허용하는 CORS 설정
   app.enableCors({
-    origin: '*',
+    origin: [
+      'http://localhost:5173',       // 1. 로컬호스트 (Vite 기본 포트 예시)
+    'http://127.0.0.1:5173',       // 1-1. 로컬호스트 IP 표기
+    'http://34.64.126.140:3000/',    // 2. 내 내부 IP
+    'http://34.64.126.140:3001/',    // 2. 내 내부 IP
+    'http://34.64.126.140:5173/',    // 2. 내 내부 IP
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
