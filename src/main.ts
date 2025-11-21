@@ -13,6 +13,9 @@ async function bootstrap() {
     'http://34.64.126.140:3000/',    // 2. 내 내부 IP
     'http://34.64.126.140:3001/',    // 2. 내 내부 IP
     'http://34.64.126.140:5173/',    // 2. 내 내부 IP
+    'http://34.64.126.140:3000',    // 2. 내 내부 IP
+    'http://34.64.126.140:3001',    // 2. 내 내부 IP
+    'http://34.64.126.140:5173',    // 2. 내 내부 IP
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
