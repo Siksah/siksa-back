@@ -1,9 +1,6 @@
 /dockerfiles
 /.github
 
-/dockerfiles/backend.Dockerfile
-/.github/workflows/main.yml
-
 # compiled output
 /dist
 /node_modules
