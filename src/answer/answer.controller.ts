@@ -25,6 +25,9 @@ export class answerController {
         data: {
             Q1: savedDocument.Q1, 
             Q2: savedDocument.Q2,
+            Q3: savedDocument.Q3, 
+            Q4: savedDocument.Q4, 
+            Q5: savedDocument.Q5, 
             Q6: savedDocument.Q6,
             Result_Type: savedDocument.Result_Type,
             timestamp: savedDocument.timestamp.toISOString(), // Date 객체를 string으로 변환
@@ -33,7 +36,8 @@ export class answerController {
 
     } catch (error) {
         // 🚨 DB 저장 중 오류가 발생하면 이 부분이 터미널에 출력됩니다.
-        this.logger.error('🚨 MongoDB 저장 중 심각한 오류 발생:', error.message, error.stack);
+        const err = error as Error; 
+        this.logger.error('🚨 MongoDB 저장 중 심각한 오류 발생:', err.message, err.stack);
         throw error; 
     }
   }
