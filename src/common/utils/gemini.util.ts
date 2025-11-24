@@ -68,7 +68,7 @@ export class GeminiUtil {
   constructor() {
     this.genAI = new GoogleGenAI({})
   }
-  async generateText(reqData: GenerateTextDto): Promise<string> {
+  async generateText(reqData: GenerateTextDto): Promise<{ text: string; metaData?: UsageMetadata }> {
     const params = applyModelDefaults('text', reqData)
     this.logger.debug(`params: ${JSON.stringify(params)}`)
 
@@ -93,6 +93,6 @@ export class GeminiUtil {
 
     this.logger.log(`metaData: ${JSON.stringify(metaData)}`)
 
-    return fullText
+    return { text: fullText, metaData }
   }
 }

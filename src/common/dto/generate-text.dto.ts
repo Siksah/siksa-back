@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber, ValidateNested, Min, Max } from 'class-validator'
+import { IsNotEmpty, IsOptional, IsString, IsNumber, ValidateNested, Min, Max, IsBoolean } from 'class-validator'
 import { Type, Transform } from 'class-transformer'
 import { ThinkingLevel } from '@google/genai'
 export class GenerateConfigDto {
@@ -49,4 +49,14 @@ export class GenerateTextDto {
   @ValidateNested()
   @Type(() => GenerateConfigDto)
   config?: GenerateConfigDto
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }: { value: unknown }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase() === 'true'
+    }
+    return value
+  })
+  isAdmin?: boolean
 }

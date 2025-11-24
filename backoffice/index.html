@@ -298,6 +298,11 @@
                     <option value="HIGH">HIGH</option>
                 </select>
             </div>
+
+            <div class="form-group" style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="isAdmin">
+                <label for="isAdmin" style="margin-bottom: 0; font-weight: normal;">Is Admin (Metadata)</label>
+            </div>
         </div>
 
         <!-- Center Panel: Prompt -->
@@ -312,6 +317,7 @@
         <!-- Right Panel: Output -->
         <div class="panel panel-right">
             <div id="output"></div>
+            <div id="metadata-display" class="hidden" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.875rem; color: var(--text-secondary);"></div>
         </div>
     </div>
 
@@ -326,10 +332,12 @@
         const temperatureVal = document.getElementById('temperature-val');
         const generateBtn = document.getElementById('generate-btn');
         const outputDiv = document.getElementById('output');
+        const metadataDiv = document.getElementById('metadata-display');
         const promptInput = document.getElementById('prompt');
         const thinkingLevelSelect = document.getElementById('thinkingLevel');
         const dynamicThinkingBudgetCheckbox = document.getElementById('dynamicThinkingBudget');
         const zeroBudgetMsg = document.getElementById('zero-budget-msg');
+        const isAdminCheckbox = document.getElementById('isAdmin');
 
         // Update range value displays (Bidirectional)
         temperatureInput.addEventListener('input', (e) => {
@@ -371,7 +379,7 @@
 
         function updateZeroBudgetMsg() {
             const model = modelSelect.value;
-            const budget = parseInt(thinkingBudgetInput.value);
+            const budget = parseInt(thinkingBudgetVal.value);
             
             if (model === 'gemini-2.5-flash' && budget === 0 && !dynamicThinkingBudgetCheckbox.checked) {
                 zeroBudgetMsg.classList.remove('hidden');
@@ -433,10 +441,12 @@
 
             const model = modelSelect.value;
             const temperature = parseFloat(temperatureInput.value);
+            const isAdmin = isAdminCheckbox.checked;
             
             const payload = {
                 prompt: prompt,
                 model: model,
+                isAdmin: isAdmin,
                 config: {
                     temperature: temperature
                 }
@@ -447,7 +457,7 @@
                 if (dynamicThinkingBudgetCheckbox.checked) {
                      payload.config.thinkingBudget = -1;
                 } else {
-                    payload.config.thinkingBudget = parseInt(thinkingBudgetInput.value);
+                    payload.config.thinkingBudget = parseInt(thinkingBudgetVal.value);
                 }
             }
             if (!thinkingLevelGroup.classList.contains('hidden')) {
@@ -463,6 +473,8 @@
             generateBtn.disabled = true;
             generateBtn.innerHTML = 'Generating <span class="loading"></span>';
             outputDiv.innerHTML = '';
+            metadataDiv.innerHTML = '';
+            metadataDiv.classList.add('hidden');
 
             // const reqUrl = 'http://34.64.126.140:3001/api/common/gemini/text';
             const reqUrl = 'http://localhost:3001/api/common/gemini/text';
@@ -484,6 +496,26 @@
                 
                 // Render Markdown
                 outputDiv.innerHTML = marked.parse(data.text);
+
+                // Render Metadata if present
+                if (data.metaData) {
+                    const meta = data.metaData;
+                    const translations = {
+                        promptTokenCount: '프롬프트 토큰 수',
+                        candidatesTokenCount: '응답 토큰 수',
+                        totalTokenCount: '총 토큰 수',
+                        thoughtsTokenCount: '생각 토큰 수'
+                    };
+                    
+                    let metaHtml = '<strong>메타데이터 (Metadata)</strong><br>';
+                    for (const [key, value] of Object.entries(meta)) {
+                        const label = translations[key] || key;
+                        if(key === 'promptTokensDetails') continue;
+                        metaHtml += `${label}: ${value}<br>`;
+                    }
+                    metadataDiv.innerHTML = metaHtml;
+                    metadataDiv.classList.remove('hidden');
+                }
 
             } catch (error) {
                 console.error('Error:', error);
