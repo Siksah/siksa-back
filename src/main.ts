@@ -18,7 +18,7 @@ async function bootstrap() {
     // 'http://34.64.126.140:5173',    // 2. 내 내부 IP
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
+    credentials: false,
   });
 
   // 2. 전역 유효성 검사 파이프 설정 (DTO 사용을 위해 필수)
