@@ -28,8 +28,8 @@ import { join } from 'path'
 
     // 3. ServeStaticModule - backoffice HTML 서빙
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'backoffice'),
-      serveRoot: '/backoffice',
+      rootPath: join(__dirname, 'public'),
+      serveRoot: '/api-test',
     }),
 
     CommonModule, AnswerModule,
