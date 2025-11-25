@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import {
   GoogleGenAI,
   UsageMetadata,
@@ -15,16 +15,16 @@ import { GenerateTextDto } from '../dto/generate-text.dto'
  * model이 gemini-3일 경우 thinkingLevel이 필요함
  * model이 gemini-2.5일 경우 thinkingBudget이 필요함
  */
-function applyModelDefaults(reqType: string, dto: GenerateTextDto) {
+export function applyModelDefaults(reqType: string, dto: GenerateTextDto) {
   if (reqType === 'text') {
-    const model = dto.model
-    const thinkingLevel = dto.config?.thinkingLevel == undefined ? ThinkingLevel.LOW : dto.config?.thinkingLevel
-    const thinkingBudget = dto.config?.thinkingBudget == undefined ? -1 : dto.config?.thinkingBudget
-    const temperature = dto.config?.temperature == undefined ? 1.0 : dto.config?.temperature
-    const contents = dto.prompt
+    const { model, prompt, config } = dto
+    const thinkingLevel = config?.thinkingLevel ?? ThinkingLevel.LOW
+    const thinkingBudget = config?.thinkingBudget ?? -1
+    const temperature = config?.temperature ?? 1.0
+
     const result: GenerateContentParameters = {
       model: model,
-      contents: contents,
+      contents: prompt,
     }
 
     if (model === 'gemini-3-pro-preview') {
@@ -33,19 +33,15 @@ function applyModelDefaults(reqType: string, dto: GenerateTextDto) {
           thinkingLevel: thinkingLevel,
         },
       }
-    } else if (model === 'gemini-2.5-pro') {
-      if (thinkingBudget != -1 && (thinkingBudget < 128 || thinkingBudget > 32768)) {
-        throw new Error('thinkingBudget must be between 128 and 32768')
-      }
-      result.config = {
-        thinkingConfig: {
-          thinkingBudget: thinkingBudget,
-        },
-        temperature: temperature,
-      }
-    } else if (model === 'gemini-2.5-flash') {
-      if (thinkingBudget != -1 && (thinkingBudget < 0 || thinkingBudget > 24576)) {
-        throw new Error('thinkingBudget must be between 0 and 24576')
+    } else {
+      if (model === 'gemini-2.5-pro') {
+        if (thinkingBudget != -1 && (thinkingBudget < 128 || thinkingBudget > 32768)) {
+          throw new BadRequestException('thinkingBudget must be between 128 and 32768')
+        }
+      } else if (model === 'gemini-2.5-flash') {
+        if (thinkingBudget != -1 && (thinkingBudget < 0 || thinkingBudget > 24576)) {
+          throw new BadRequestException('thinkingBudget must be between 0 and 24576')
+        }
       }
       result.config = {
         thinkingConfig: {
@@ -56,7 +52,7 @@ function applyModelDefaults(reqType: string, dto: GenerateTextDto) {
     }
     return result
   } else {
-    throw new Error('reqType must be text now')
+    throw new BadRequestException('reqType must be text now')
   }
 }
 
@@ -68,7 +64,7 @@ export class GeminiUtil {
   constructor() {
     this.genAI = new GoogleGenAI({})
   }
-  async generateText(reqData: GenerateTextDto): Promise<string> {
+  async generateText(reqData: GenerateTextDto): Promise<{ text: string; metaData?: UsageMetadata }> {
     const params = applyModelDefaults('text', reqData)
     this.logger.debug(`params: ${JSON.stringify(params)}`)
 
@@ -93,6 +89,6 @@ export class GeminiUtil {
 
     this.logger.log(`metaData: ${JSON.stringify(metaData)}`)
 
-    return fullText
+    return { text: fullText, metaData }
   }
 }

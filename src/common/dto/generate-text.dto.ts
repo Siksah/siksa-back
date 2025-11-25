@@ -1,6 +1,17 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber, ValidateNested, Min, Max } from 'class-validator'
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsNumber,
+  ValidateNested,
+  Min,
+  Max,
+  IsBoolean,
+  IsEnum,
+} from 'class-validator'
 import { Type, Transform } from 'class-transformer'
 import { ThinkingLevel } from '@google/genai'
+
 export class GenerateConfigDto {
   @IsOptional()
   @IsNumber()
@@ -15,13 +26,8 @@ export class GenerateConfigDto {
   thinkingBudget?: number
 
   @IsOptional()
-  @Transform(({ value }: { value: unknown }) => {
-    if (typeof value === 'string') {
-      return value.toUpperCase() === 'LOW' ? ThinkingLevel.LOW : ThinkingLevel.HIGH
-    } else {
-      throw new Error('thinkingLevel is just "low" or "high"')
-    }
-  })
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.toUpperCase() : value))
+  @IsEnum(ThinkingLevel, { message: 'thinkingLevel is just "low" or "high"' })
   thinkingLevel?: ThinkingLevel
 
   @IsOptional()
@@ -49,4 +55,14 @@ export class GenerateTextDto {
   @ValidateNested()
   @Type(() => GenerateConfigDto)
   config?: GenerateConfigDto
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }: { value: unknown }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase() === 'true'
+    }
+    return value
+  })
+  isAdmin?: boolean
 }
