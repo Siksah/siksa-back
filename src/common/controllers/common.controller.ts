@@ -1,20 +1,15 @@
-import { Body, Controller, Logger, Post } from '@nestjs/common'
+import { Body, Controller, Post } from '@nestjs/common'
 import { GenerateTextDto } from '../dto/generate-text.dto'
-import { GeminiUtil } from '../utils/gemini.util'
+import { CommonService } from '../services/common.service'
 
 @Controller('api/common')
 export class CommonController {
-  logger = new Logger(CommonController.name)
-
-  constructor(private readonly geminiUtil: GeminiUtil) {}
+  constructor(private readonly commonService: CommonService) {}
 
   @Post('gemini/text')
-  async generate(@Body() generateTextDto: GenerateTextDto): Promise<{ text: string }> {
-    this.logger.debug(`generateTextDto: ${JSON.stringify(generateTextDto)}`)
+  async generate(@Body() generateTextDto: GenerateTextDto): Promise<{ text: string; metaData?: any }> {
+    const result = await this.commonService.generateText(generateTextDto)
 
-    const text = await this.geminiUtil.generateText(generateTextDto)
-
-    this.logger.debug(`text: ${text}`)
-    return { text }
+    return result
   }
 }

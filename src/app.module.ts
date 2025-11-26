@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CommonModule } from './common/common.module';
+import { Module } from '@nestjs/common'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { MongooseModule } from '@nestjs/mongoose'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { CommonModule } from './common/common.module'
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { join } from 'path'
 
 @Module({
   imports: [
@@ -22,6 +24,13 @@ import { CommonModule } from './common/common.module';
       }),
       inject: [ConfigService], // ConfigService 주입
     }),
+
+    // 3. ServeStaticModule - backoffice HTML 서빙
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'backoffice'),
+      serveRoot: '/backoffice',
+    }),
+
     CommonModule,
   ],
 
