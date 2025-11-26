@@ -488,11 +488,14 @@
                     body: JSON.stringify(payload)
                 });
 
+                const result = await response.json();
+                
                 if (!response.ok) {
-                    throw new Error(`API Error: ${response.statusText}`);
+                    throw new Error(result.message);
                 }
 
-                const data = await response.json();
+                // Extract data from the new response format
+                const data = result.data;
                 
                 // Render Markdown
                 outputDiv.innerHTML = marked.parse(data.text);
@@ -519,7 +522,19 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                outputDiv.innerHTML = `<p style="color: #ef4444;">Error: ${error.message}</p>`;
+                
+                // Try to extract error message from the new response format
+                let errorMessage = error.message;
+                try {
+                    const errorResponse = await error.response?.json();
+                    if (errorResponse?.message) {
+                        errorMessage = errorResponse.message;
+                    }
+                } catch (e) {
+                    // If parsing fails, use the original error message
+                }
+                
+                outputDiv.innerHTML = `<p style="color: #ef4444;">Error: ${errorMessage}</p>`;
             } finally {
                 generateBtn.disabled = false;
                 generateBtn.textContent = 'Generate';

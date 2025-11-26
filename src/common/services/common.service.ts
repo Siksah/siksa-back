@@ -11,9 +11,9 @@ export class CommonService {
   async generateText(dto: GenerateTextDto): Promise<{ text: string; metaData?: any }> {
     const { text, metaData } = await this.geminiUtil.generateText(dto)
 
-    this.logger.log(`dto: ${JSON.stringify(dto)}`)
-    this.logger.log(`text: ${text}`)
-    this.logger.log(`metaData: ${JSON.stringify(metaData)}`)
+    this.logger.debug(`dto: ${JSON.stringify(dto)}`)
+    this.logger.debug(`text: ${text}`)
+    this.logger.debug(`metaData: ${JSON.stringify(metaData)}`)
 
     if (dto.isAdmin) {
       return { text, metaData }

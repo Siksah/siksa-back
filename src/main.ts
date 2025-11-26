@@ -4,8 +4,12 @@ import { ValidationPipe } from '@nestjs/common'
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { TransformInterceptor } from './common/interceptors/transform.interceptor'
 
+import { winstonLogger } from './common/utils/winston.config'
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, {
+    logger: winstonLogger,
+  })
 
   // 1. React 앱의 주소 (http://localhost:5173)를 허용하는 CORS 설정
   app.enableCors({
