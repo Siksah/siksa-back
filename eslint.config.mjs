@@ -29,19 +29,7 @@ export default tseslint.config(
             '@typescript-eslint/no-explicit-any': 'off',
             '@typescript-eslint/no-floating-promises': 'warn',
             '@typescript-eslint/no-unsafe-argument': 'warn',
-            'prettier/prettier': [
-                'error',
-                { 
-                    singleQuote: true,
-                    trailingComma: 'all',
-                    tabWidth: 2,
-                    semi: false,
-                    printWidth: 120,
-                    arrowParens: 'avoid',
-                    endOfLine: 'auto',
-                    bracketSpacing: true,
-                },
-            ],
+            'prettier/prettier': 'error',
         },
     },
 )
