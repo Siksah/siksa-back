@@ -67,5 +67,5 @@ export const winstonLogger = loggerInstance
 // 런타임에 로그 레벨 변경 함수
 export function setLogLevel(level: string) {
   ;(loggerInstance as unknown as { level: string }).level = level
-  console.warn(`Log level changed to: ${level}`)
+  winstonLogger.warn(`Log level changed to: ${level}`)
 }

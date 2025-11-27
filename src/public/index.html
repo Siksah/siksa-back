@@ -521,7 +521,7 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                outputDiv.innerHTML = `<p style="color: #ef4444;">Error: ${errorMessage}</p>`;
+                outputDiv.innerHTML = `<p style="color: #ef4444;">Error: ${error}</p>`;
             } finally {
                 generateBtn.disabled = false;
                 generateBtn.textContent = 'Generate';
