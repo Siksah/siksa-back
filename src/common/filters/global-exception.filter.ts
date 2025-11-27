@@ -1,5 +1,6 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common'
 import { Request, Response } from 'express'
+import { safeStringify } from '../utils/utils'
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -30,7 +31,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           : message,
     }
 
-    this.logger.error(`Exception: ${JSON.stringify(responseBody)}`, exception instanceof Error ? exception.stack : '')
+    this.logger.error(`Exception: ${safeStringify(responseBody)}`, exception instanceof Error ? exception.stack : '')
 
     response.status(status).json(responseBody)
   }

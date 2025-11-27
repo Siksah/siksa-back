@@ -7,6 +7,7 @@ import {
   GenerateContentParameters,
 } from '@google/genai'
 import { GenerateTextDto } from '../dto/generate-text.dto'
+import { safeStringify } from './utils'
 
 /**
  * reqType: 'text', 'image', 'audio'
@@ -66,7 +67,7 @@ export class GeminiUtil {
   }
   async generateText(reqData: GenerateTextDto): Promise<{ text: string; metaData?: UsageMetadata }> {
     const params = applyModelDefaults('text', reqData)
-    this.logger.debug(`params: ${JSON.stringify(params)}`)
+    this.logger.debug(`params: ${safeStringify(params)}`)
 
     let response: AsyncGenerator<GenerateContentResponse> | undefined
     try {
@@ -87,7 +88,7 @@ export class GeminiUtil {
       }
     }
 
-    this.logger.log(`metaData: ${JSON.stringify(metaData)}`)
+    this.logger.debug(`metaData: ${safeStringify(metaData)}`)
 
     return { text: fullText, metaData }
   }

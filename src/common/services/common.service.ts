@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { GeminiUtil } from '../utils/gemini.util'
 import { GenerateTextDto } from '../dto/generate-text.dto'
+import { safeStringify } from '../utils/utils'
 
 @Injectable()
 export class CommonService {
@@ -11,9 +12,9 @@ export class CommonService {
   async generateText(dto: GenerateTextDto): Promise<{ text: string; metaData?: any }> {
     const { text, metaData } = await this.geminiUtil.generateText(dto)
 
-    this.logger.debug(`dto: ${JSON.stringify(dto)}`)
+    this.logger.debug(`dto: ${safeStringify(dto)}`)
     this.logger.debug(`text: ${text}`)
-    this.logger.debug(`metaData: ${JSON.stringify(metaData)}`)
+    this.logger.debug(`metaData: ${safeStringify(metaData)}`)
 
     if (dto.isAdmin) {
       return { text, metaData }
