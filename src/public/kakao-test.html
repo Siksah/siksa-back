@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kakao Local API Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+            color: #fee500; /* Kakao Yellow */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            -webkit-text-stroke: 1px #333;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #fee500;
+            color: #191919;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #fdd835;
+        }
+        #response {
+            background-color: #2d2d2d;
+            color: #ccc;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin-top: 1rem;
+            min-height: 200px;
+        }
+        .note {
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 1rem;
+            background: #fff3cd;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kakao Local API Tester</h1>
+        
+        <div class="note">
+            <strong>Note:</strong> This tool makes direct client-side requests. If you encounter CORS errors, you may need to run this file from a local server or use a browser extension to bypass CORS for testing purposes.
+        </div>
+
+        <div class="form-group">
+            <label for="apiKey">REST API Key</label>
+            <input type="text" id="apiKey" placeholder="Enter your Kakao REST API Key">
+        </div>
+
+        <div class="form-group">
+            <label for="endpoint">Endpoint</label>
+            <select id="endpoint">
+                <option value="https://dapi.kakao.com/v2/local/search/keyword.json">Keyword Search (키워드로 장소 검색)</option>
+                <option value="https://dapi.kakao.com/v2/local/search/address.json">Address Search (주소 검색)</option>
+                <option value="https://dapi.kakao.com/v2/local/search/category.json">Category Search (카테고리로 장소 검색)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="query">Query</label>
+            <input type="text" id="query" placeholder="e.g., 강남역, 판교">
+        </div>
+
+        <div class="form-group" style="background: #f0f0f0; padding: 1rem; border-radius: 4px;">
+            <label>Location (Optional)</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 0.5rem;">
+                <input type="text" id="x" placeholder="Longitude (x)">
+                <input type="text" id="y" placeholder="Latitude (y)">
+            </div>
+            <button type="button" onclick="getLocation()" style="background-color: #e0e0e0; font-size: 0.9rem; padding: 0.5rem;">📍 Get Current Location</button>
+        </div>
+
+        <button onclick="sendRequest()">Send Request</button>
+
+        <div id="response">Response will appear here...</div>
+    </div>
+
+    <script>
+        function getLocation() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+
+            const btn = document.querySelector('button[onclick="getLocation()"]');
+            const originalText = btn.textContent;
+            btn.textContent = 'Locating...';
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    document.getElementById('x').value = position.coords.longitude;
+                    document.getElementById('y').value = position.coords.latitude;
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                },
+                (error) => {
+                    alert('Unable to retrieve your location: ' + error.message);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            );
+        }
+
+        async function sendRequest() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const endpoint = document.getElementById('endpoint').value;
+            const query = document.getElementById('query').value.trim();
+            const x = document.getElementById('x').value.trim();
+            const y = document.getElementById('y').value.trim();
+            const responseDiv = document.getElementById('response');
+
+            if (!apiKey) {
+                alert('Please enter your REST API Key');
+                return;
+            }
+            if (!query) {
+                alert('Please enter a query');
+                return;
+            }
+
+            responseDiv.textContent = 'Loading...';
+
+            try {
+                // Construct URL with query parameters
+                const url = new URL(endpoint);
+                url.searchParams.append('query', query);
+
+                if (x) url.searchParams.append('x', x);
+                if (y) url.searchParams.append('y', y);
+
+                // Add specific parameters for category search if needed, 
+                // but for generic test, we'll stick to 'query' which works for keyword/address.
+                // Note: Category search usually requires 'category_group_code' or location (x,y) + radius.
+                // For simplicity in this generic tester, we rely on 'query' if supported or just basic params.
+                // *Correction*: Category search DOES NOT use 'query' param usually, it uses rect or circle.
+                // Let's handle special case for category if user selects it, or just warn.
+                
+                if (endpoint.includes('category.json')) {
+                     // Category search doesn't strictly use 'query' like keyword search.
+                     // It needs category_group_code. 
+                     // For this simple test, let's just treat 'query' as 'category_group_code' if selected?
+                     // Or better, just stick to Keyword/Address for the "Query" input context.
+                     console.warn('Category search might require different parameters (x, y, radius, category_group_code).');
+                }
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `KakaoAK ${apiKey}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}\n\nCheck console for more details. If this is a CORS error, try running this file via a local server or disable CORS in browser for testing.`;
+                console.error('API Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

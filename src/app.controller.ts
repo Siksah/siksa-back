@@ -21,4 +21,9 @@ export class AppController {
   getApiTest(@Res() res: Response) {
     return res.sendFile(join(__dirname, 'public', 'index.html'))
   }
+
+  @Get('kakao-test')
+  getKakaoTest(@Res() res: Response) {
+    return res.sendFile(join(__dirname, 'public', 'kakao-test.html'))
+  }
 }
