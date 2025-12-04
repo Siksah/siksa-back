@@ -7,6 +7,7 @@ import { CommonModule } from './common/common.module';
 import { AnswerModule } from './answer/answer.module';
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
+import { SessionController } from './session/session.controller';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { join } from 'path'
     CommonModule, AnswerModule,
   ],
 
-  controllers: [AppController],
+  controllers: [AppController, SessionController],
   providers: [AppService],
 })
 export class AppModule {}
