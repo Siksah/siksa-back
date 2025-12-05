@@ -7,7 +7,7 @@ export class CommonController {
   constructor(private readonly commonService: CommonService) {}
 
   @Post('gemini/text')
-  async generate(@Body() generateTextDto: GenerateTextDto): Promise<{ text: string; metaData?: any }> {
+  async generate(@Body() generateTextDto: GenerateTextDto): Promise<{ text: string; metaData?: any; time?: number }> {
     const result = await this.commonService.generateText(generateTextDto)
 
     return result

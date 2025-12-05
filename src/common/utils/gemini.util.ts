@@ -65,10 +65,12 @@ export class GeminiUtil {
   constructor() {
     this.genAI = new GoogleGenAI({})
   }
-  async generateText(reqData: GenerateTextDto): Promise<{ text: string; metaData?: UsageMetadata }> {
+
+  async generateText(reqData: GenerateTextDto): Promise<{ text: string; metaData?: UsageMetadata; time?: number }> {
     const params = applyModelDefaults('text', reqData)
     this.logger.debug(`params: ${safeStringify(params)}`)
 
+    const startTime = Date.now()
     let response: AsyncGenerator<GenerateContentResponse> | undefined
     try {
       response = await this.genAI.models.generateContentStream(params)
@@ -87,9 +89,10 @@ export class GeminiUtil {
         metaData = chunk.usageMetadata
       }
     }
-
+    const endTime = Date.now()
     this.logger.debug(`metaData: ${safeStringify(metaData)}`)
+    this.logger.debug(`time: ${endTime - startTime}`)
 
-    return { text: fullText, metaData }
+    return { text: fullText, metaData, time: endTime - startTime }
   }
 }

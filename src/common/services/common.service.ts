@@ -9,15 +9,16 @@ export class CommonService {
 
   constructor(private readonly geminiUtil: GeminiUtil) {}
 
-  async generateText(dto: GenerateTextDto): Promise<{ text: string; metaData?: any }> {
-    const { text, metaData } = await this.geminiUtil.generateText(dto)
+  async generateText(dto: GenerateTextDto): Promise<{ text: string; metaData?: any; time?: number }> {
+    const { text, metaData, time } = await this.geminiUtil.generateText(dto)
 
     this.logger.debug(`dto: ${safeStringify(dto)}`)
     this.logger.debug(`text: ${text}`)
     this.logger.debug(`metaData: ${safeStringify(metaData)}`)
+    this.logger.debug(`time: ${time}`)
 
     if (dto.isAdmin) {
-      return { text, metaData }
+      return { text, metaData, time }
     }
 
     return { text }
