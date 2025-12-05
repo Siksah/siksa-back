@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { Session, SessionDocument } from './session.schema';
+import { Session, SessionDocument } from './schemas/session.schema';
 
 @Injectable()
 export class SessionsService {
@@ -34,5 +34,4 @@ export class SessionsService {
     return this.sessionModel.findOne({ sessionId }).exec();
   }
 
-  // ... 필요하다면 세션 데이터 업데이트 로직 추가 ...
 }
