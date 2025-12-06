@@ -2,6 +2,7 @@ import { utilities, WinstonModule } from 'nest-winston'
 import { join } from 'path'
 import * as winston from 'winston'
 import winstonDaily from 'winston-daily-rotate-file'
+import { safeStringify } from './utils'
 
 const env = process.env.NODE_ENV
 const logDir = join(__dirname, '..', '..', '..', 'logs')
@@ -14,9 +15,9 @@ const fileLogFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
   winston.format.printf(({ timestamp, level, message, context, stack }) => {
-    const contextStr = context ? `[${String(context)}]` : '[SiksaBack]'
+    const contextStr = context ? `[${String(safeStringify(context))}]` : '[SiksaBack]'
     const baseLog = `${String(timestamp)} [${String(level).toUpperCase()}] ${contextStr} ${String(message)}`
-    return stack ? `${baseLog}\n${String(stack)}` : baseLog
+    return stack ? `${baseLog}\n${String(safeStringify(stack))}` : baseLog
   }),
 )
 
@@ -65,6 +66,6 @@ export const winstonLogger = loggerInstance
 
 // 런타임에 로그 레벨 변경 함수
 export function setLogLevel(level: string) {
-  ;(loggerInstance as any).level = level
-  console.log(`Log level changed to: ${level}`)
+  ;(loggerInstance as unknown as { level: string }).level = level
+  winstonLogger.warn(`Log level changed to: ${level}`)
 }

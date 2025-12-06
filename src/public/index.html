@@ -506,7 +506,7 @@
                         promptTokenCount: '프롬프트 토큰 수',
                         candidatesTokenCount: '응답 토큰 수',
                         totalTokenCount: '총 토큰 수',
-                        thoughtsTokenCount: '생각 토큰 수'
+                        thoughtsTokenCount: '생각 토큰 수',
                     };
                     
                     let metaHtml = '<strong>메타데이터 (Metadata)</strong><br>';
@@ -515,13 +515,14 @@
                         if(key === 'promptTokensDetails') continue;
                         metaHtml += `${label}: ${value}<br>`;
                     }
+                    metaHtml += `응답 시간: ${data.time}ms`;
                     metadataDiv.innerHTML = metaHtml;
                     metadataDiv.classList.remove('hidden');
                 }
 
             } catch (error) {
                 console.error('Error:', error);
-                outputDiv.innerHTML = `<p style="color: #ef4444;">Error: ${errorMessage}</p>`;
+                outputDiv.innerHTML = `<p style="color: #ef4444;">Error: ${error}</p>`;
             } finally {
                 generateBtn.disabled = false;
                 generateBtn.textContent = 'Generate';
