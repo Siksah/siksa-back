@@ -1,11 +1,16 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Post, Res, Req, UnauthorizedException } from '@nestjs/common';
 // ⚠️ express가 아닌 확장된 Request 타입을 사용하도록 수정합니다.
 // 세션 미들웨어가 Express 기반이므로 'express'에서 가져옵니다.
-import type { Request } from 'express';
+import type { Response, Request } from 'express';
+import { SessionsService } from './sessions.service';
 // AppService는 SessionController에서 사용하지 않으므로 제거합니다.
+
+const SESSION_COOKIE_NAME = 'anon_session_id';
 
 @Controller('session')
 export class SessionController {
+
+  constructor(private readonly sessionsService: SessionsService) {}
   
   // AppService 주입이 필요 없다면 제거합니다. (SessionController에서 사용하지 않기 때문)
   // constructor(private readonly appService: AppService) {} 
@@ -50,4 +55,48 @@ export class SessionController {
         message: message,
     };
   }
+
+  @Post('create')
+  async create(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const clientIp = req.ip;
+    const initialData = { ip: clientIp }; // 익명 세션의 초기 데이터
+
+    // 1. 세션 ID 생성 및 MongoDB에 TTL과 함께 저장
+    const sessionId = await this.sessionsService.createSession(initialData);
+    
+
+    // 2. 응답 헤더에 Session Cookie 설정
+    // 💡 maxAge/expires 미지정: 브라우저 세션 쿠키로 동작 (탭/브라우저 닫으면 삭제)
+    res.cookie(SESSION_COOKIE_NAME, sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'lax',
+    });
+
+    return { message: 'Session created', sessionId };
+  }
+  
+  @Post('check')
+  async checkSession(@Req() req: Request) {
+    const sessionId = req.cookies[SESSION_COOKIE_NAME];
+    
+    if (!sessionId) {
+      // 쿠키가 없으면 새 탭/브라우저에서 접속한 것으로 간주
+      throw new UnauthorizedException('No session cookie found');
+    }
+    
+    // 3. MongoDB에서 세션 조회 (TTL이 지나면 자동으로 null 반환됨)
+    const session = await this.sessionsService.findSession(sessionId);
+    
+    if (!session) {
+      // MongoDB에 세션이 없으면 30분이 지나 만료된 것입니다.
+      throw new UnauthorizedException('Session expired');
+    }
+    
+    return { data: 'Session is valid!', sessionData: session.data };
+  }
+
 }
