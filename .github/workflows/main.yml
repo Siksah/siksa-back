@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - proto
+      - proto2
     paths:
       - '**'
   # 💡 수동 실행(Manual Trigger) 옵션 추가 
