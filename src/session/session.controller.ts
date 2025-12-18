@@ -61,9 +61,11 @@ export class SessionController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
+    console.log('create req', req);
     const clientIp = req.ip;
     const initialData = { ip: clientIp }; // 익명 세션의 초기 데이터
 
+    console.log('initialData', initialData);
     // 1. 세션 ID 생성 및 MongoDB에 TTL과 함께 저장
     const sessionId = await this.sessionsService.createSession(initialData);
     
