@@ -6,6 +6,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 
 import { winstonLogger } from './common/utils/winston.config'
 import { ConfigService } from '@nestjs/config';
+import * as cookieParser from 'cookie-parser';
 import * as expressSession from 'express-session';
 
 const session = require('express-session');
@@ -21,7 +22,10 @@ async function bootstrap() {
   const MONGO_URI = configService.get<string>('MONGO_URI'); // 환경 변수 이름 확인 필요
   const SESSION_SECRET = configService.get<string>('SESSION_SECRET');
 
-  // 1. React 앱의 주소를 허용하는 CORS 설정
+  // cookie-parser 등록 (session보다 먼저 와야 함)
+  app.use(cookieParser());
+
+  // React 앱의 주소를 허용하는 CORS 설정
   app.enableCors({
      origin: [ // '*', null,
         'http://localhost:5173',       // 1. 로컬호스트 (Vite 기본 포트 예시)
@@ -54,6 +58,7 @@ async function bootstrap() {
 
   app.use(
     session({
+      name: 'anon_session_id', // 쿠키 이름 통일
       secret: SESSION_SECRET, // 세션 암호화 키
       resave: false,
       saveUninitialized: true, // 익명 세션을 위해 필수: 요청이 들어왔을 때 세션에 아무 데이터가 없더라도 저장
@@ -62,6 +67,7 @@ async function bootstrap() {
         maxAge: 1000 * 60 * 60 * 24 * 7, // 1주일
         httpOnly: true, // XSS 공격 방지
         secure: process.env.NODE_ENV === 'production', // HTTPS에서만 true
+        sameSite: 'lax',
       },
     } as expressSession.SessionOptions),
   );

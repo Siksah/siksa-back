@@ -1,6 +1,9 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Logger } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Logger, Req } from '@nestjs/common';
+import type { Request } from 'express';
 import { AnswerDto } from './dto/answer.dto';
 import { AnswerService } from './answer.service';
+
+const SESSION_COOKIE_NAME = 'anon_session_id';
 
 @Controller() // 기본 경로 (prefix 없음)
 export class answerController {
@@ -12,20 +15,35 @@ export class answerController {
 
   @Post('answer')
   @HttpCode(HttpStatus.OK)
-  async handleUserAnswer(@Body() answerData: AnswerDto): Promise<{ message: string, data: any }> { 
+  async handleUserAnswer(
+    @Req() req: any,
+    @Body() answerData: AnswerDto
+  ): Promise<{ message: string, data: any }> { 
     
     try {
-      // 2. 💡 AnswerService의 create 메서드를 호출하여 MongoDB에 저장
-      const savedDocument = await this.answerService.create(answerData);
+      // 1. 쿠키에서 sessionId 추출 (없을 경우 DTO에 담긴 값 사용)
+      // main.ts의 session name과 일치해야 함
+      const sessionIdFromCookie = req.cookies?.['anon_session_id'] || req.sessionID;
 
+      console.log('sessionIdFromCookie', sessionIdFromCookie);
+      // 2. 데이터 보정 (DTO에 sessionId 주입)
+      const finalData = {
+        ...answerData,
+        sessionId: sessionIdFromCookie || answerData.sessionId, 
+      };
+
+      this.logger.log(`Saving answer for session: ${finalData.sessionId}`);
       
+      // 3. AnswerService의 create 메서드를 호출하여 MongoDB에 저장
+      // const savedDocument = await this.answerService.create(answerData);
+      const savedDocument = await this.answerService.create(finalData as any);
+
       return {
         message: 'User answers saved successfully to MongoDB.',
         data: savedDocument
       };
 
     } catch (error) {
-        // 🚨 DB 저장 중 오류가 발생하면 이 부분이 터미널에 출력됩니다.
         const err = error as Error; 
         this.logger.error('🚨 MongoDB 저장 중 심각한 오류 발생:', err.message, err.stack);
         throw error; 

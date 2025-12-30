@@ -6,6 +6,9 @@ export type AnswerDocument = Answer & Document;
 
 @Schema({ timestamps: true }) // MongoDB에 createdAt, updatedAt 필드 자동 생성
 export class Answer {
+  @Prop()
+  sessionId?: string;
+
   @Prop({ type: Object }) 
   'party-size'?: Record<string, any>;
 

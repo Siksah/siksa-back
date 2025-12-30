@@ -6,6 +6,10 @@ import { IsNotEmpty, IsString, IsOptional, IsISO8601 } from 'class-validator';
 export class AnswerDto {
     @IsOptional()
     @IsString()
+    sessionId?: string;
+
+    @IsOptional()
+    @IsString()
     'party-size'?: string;
 
     @IsOptional()
