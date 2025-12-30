@@ -1,5 +1,4 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Logger } from '@nestjs/common';
-import { Answer } from './schemas/answer.schema';
 import { AnswerDto } from './dto/answer.dto';
 import { AnswerService } from './answer.service';
 
@@ -13,7 +12,7 @@ export class answerController {
 
   @Post('answer')
   @HttpCode(HttpStatus.OK)
-  async handleUserAnswer(@Body() answerData: AnswerDto): Promise<{ message: string, data: AnswerDto }> { 
+  async handleUserAnswer(@Body() answerData: AnswerDto): Promise<{ message: string, data: any }> { 
     
     try {
       // 2. 💡 AnswerService의 create 메서드를 호출하여 MongoDB에 저장
@@ -22,16 +21,7 @@ export class answerController {
       
       return {
         message: 'User answers saved successfully to MongoDB.',
-        data: {
-            Q1: savedDocument.Q1, 
-            Q2: savedDocument.Q2,
-            Q3: savedDocument.Q3, 
-            Q4: savedDocument.Q4, 
-            Q5: savedDocument.Q5, 
-            Q6: savedDocument.Q6,
-            Result_Type: savedDocument.Result_Type,
-            timestamp: savedDocument.timestamp.toISOString(), // Date 객체를 string으로 변환
-        } as AnswerDto, // 타입을 맞춥니다.
+        data: savedDocument
       };
 
     } catch (error) {
