@@ -3,8 +3,7 @@ name: Deploy GCP VM
 on:
   push:
     branches:
-      - main
-      - proto
+      - '**'
     paths:
       - '**'
   # 💡 수동 실행(Manual Trigger) 옵션 추가 
