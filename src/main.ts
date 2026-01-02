@@ -6,7 +6,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 
 import { winstonLogger } from './common/utils/winston.config'
 import { ConfigService } from '@nestjs/config';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import * as expressSession from 'express-session';
 
 const session = require('express-session');
