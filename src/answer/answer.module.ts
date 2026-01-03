@@ -3,10 +3,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { answerController } from './answer.controller';
 import { AnswerService } from './answer.service';
 import { Answer, AnswerSchema } from './schemas/answer.schema';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Answer.name, schema: AnswerSchema }]),
+    CommonModule,
   ],
   controllers: [answerController], // AppController 등록
   providers: [AnswerService],

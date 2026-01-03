@@ -2,6 +2,8 @@ import { Controller, Post, Body, HttpCode, HttpStatus, Logger, Req } from '@nest
 import type { Request } from 'express';
 import { AnswerDto } from './dto/answer.dto';
 import { AnswerService } from './answer.service';
+import { CommonService } from '../common/services/common.service';
+import { LUNCH_PROMPT_MAPS } from '../common/constants/lunch-data';
 
 const SESSION_COOKIE_NAME = 'anon_session_id';
 
@@ -11,14 +13,17 @@ export class answerController {
   private readonly logger = new Logger(answerController.name);
 
  // 1. AnswerService 주입 (필수!)
-  constructor(private readonly answerService: AnswerService) {} 
+  constructor(
+    private readonly answerService: AnswerService,
+    private readonly commonService: CommonService,
+  ) {} 
 
   @Post('answer')
   @HttpCode(HttpStatus.OK)
   async handleUserAnswer(
     @Req() req: any,
     @Body() answerData: AnswerDto
-  ): Promise<{ message: string, data: any }> { 
+  ): Promise<{ message: string, data: any, recommendation: string }> { 
     
     try {
       // 1. 쿠키에서 sessionId 추출 (없을 경우 DTO에 담긴 값 사용)
@@ -32,15 +37,21 @@ export class answerController {
         sessionId: sessionIdFromCookie || answerData.sessionId, 
       };
 
-      this.logger.log(`Saving answer for session: ${finalData.sessionId}`);
+      this.logger.log(`Saving answer and generating recommendation for session: ${finalData.sessionId}`);
       
       // 3. AnswerService의 create 메서드를 호출하여 MongoDB에 저장
+      const [savedDocument, geminiResult] = await Promise.all([
+        this.answerService.create(finalData as any),
+        this.commonService.generateMenuRecommendation(answerData as any)
+      ]);
+      console.log(geminiResult);
       // const savedDocument = await this.answerService.create(answerData);
-      const savedDocument = await this.answerService.create(finalData as any);
+      // const savedDocument = await this.answerService.create(finalData as any);
 
       return {
-        message: 'User answers saved successfully to MongoDB.',
-        data: savedDocument
+        message: '성공적으로 저장 및 메뉴 추천이 완료되었습니다.',
+        data: savedDocument,
+        recommendation: geminiResult.text
       };
 
     } catch (error) {

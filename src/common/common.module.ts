@@ -8,5 +8,6 @@ import { CommonService } from './services/common.service'
   imports: [ConfigModule],
   controllers: [CommonController],
   providers: [GeminiUtil, CommonService],
+  exports: [CommonService],
 })
 export class CommonModule {}
