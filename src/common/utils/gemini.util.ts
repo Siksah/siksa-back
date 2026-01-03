@@ -8,6 +8,7 @@ import {
 } from '@google/genai'
 import { GenerateTextDto } from '../dto/generate-text.dto'
 import { safeStringify } from './utils'
+import { ConfigService } from '@nestjs/config';
 
 /**
  * reqType: 'text', 'image', 'audio'
@@ -62,9 +63,17 @@ export class GeminiUtil {
   private readonly genAI: GoogleGenAI
   private readonly logger = new Logger(GeminiUtil.name)
 
-  constructor() {
-    this.genAI = new GoogleGenAI({})
+  constructor(private readonly configService: ConfigService) {
+    // 로컬 .env 또는 도커 환경변수 모두에서 키를 가져옵니다.
+    const apiKey = this.configService.get<string>('GOOGLE_GENAI_API_KEY');
+    
+    this.genAI = new GoogleGenAI({
+      apiKey: apiKey, 
+    });
   }
+  // constructor() {
+  //   this.genAI = new GoogleGenAI({})
+  // }
 
   async generateText(reqData: GenerateTextDto): Promise<{ text: string; metaData?: UsageMetadata; time?: number }> {
     const params = applyModelDefaults('text', reqData)
