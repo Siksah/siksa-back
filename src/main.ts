@@ -17,6 +17,9 @@ async function bootstrap() {
     logger: winstonLogger,
   })
 
+  // 모든 API 경로 앞에 /api를 자동으로 붙입니다.
+  app.setGlobalPrefix('api');
+
   // ConfigService 인스턴스 가져오기
   const configService = app.get(ConfigService);
   const MONGO_URI = configService.get<string>('MONGO_URI'); // 환경 변수 이름 확인 필요
