@@ -30,6 +30,8 @@ async function bootstrap() {
      origin: [ // '*', null,
         'http://localhost:5173',       // 1. 로컬호스트 (Vite 기본 포트 예시)
         'http://127.0.0.1:5173',       // 1-1. 로컬호스트 IP 표기
+        'https://www.nyamnyam.kr',
+        'https://nyamnyam.kr',
     //    // 2. 내 내부 IP port 3000,3001, 5173
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
