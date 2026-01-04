@@ -28,11 +28,11 @@ export class CommonService {
   async generateMenuRecommendation(answers: Record<string, string>) {
     // 답변 ID들을 기반으로 Gemini에게 전달할 문장 조립
     const userContext = Object.entries(answers)
-      .map(([key, value]) => {
-        const map = LUNCH_PROMPT_MAPS[key];
-        return map ? `- ${key}: ${map[value]}` : `- ${key}: ${value}`;
-      })
-      .join('\n');
+      // .map(([key, value]) => {
+      //   const map = LUNCH_PROMPT_MAPS[key];
+      //   return map ? `- ${key}: ${map[value]}` : `- ${key}: ${value}`;
+      // })
+      // .join('\n');
 
       console.log('userContext', userContext);
 

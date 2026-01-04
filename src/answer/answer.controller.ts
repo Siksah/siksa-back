@@ -3,7 +3,6 @@ import type { Request } from 'express';
 import { AnswerDto } from './dto/answer.dto';
 import { AnswerService } from './answer.service';
 import { CommonService } from '../common/services/common.service';
-import { LUNCH_PROMPT_MAPS } from '../common/constants/lunch-data';
 
 const SESSION_COOKIE_NAME = 'anon_session_id';
 
