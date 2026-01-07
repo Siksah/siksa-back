@@ -19,7 +19,7 @@ export class SessionsService {
     const newSession = new this.sessionModel({
       sessionId: sessionId,
       data: initialData,
-      // createdAt은 스키마의 default로 자동 설정됩니다.
+      // createdAt은 스키마의 default로 자동 설정
     });
 
     await newSession.save();

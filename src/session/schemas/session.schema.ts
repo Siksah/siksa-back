@@ -13,8 +13,6 @@ export class Session {
   @Prop({ 
     required: true, 
     default: () => new Date(),
-    // 💡 TTL 인덱스 설정: 이 필드가 저장된 후 1800초 (30분)가 지나면 도큐먼트가 자동 삭제
-    expires: 30 * 60 // 1800초 = 30분
   })
   createdAt!: Date; 
 
