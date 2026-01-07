@@ -1,13 +1,18 @@
 name: Deploy GCP VM
+run-name: "[${{ github.ref_name }}] [${{ github.event.head_commit.message }}] [${{ github.actor }}]"
 
 on:
   push:
     branches:
       - '**'
-    paths:
-      - '**'
+
   # 💡 수동 실행(Manual Trigger) 옵션 추가 
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      commit_message:
+        description: '임의 커밋 메시지'
+        required: true
+        default: 'Manual deploy' # 입력이 없을 경우 기본값
       
 jobs:
   deploy:
