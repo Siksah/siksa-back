@@ -22,9 +22,10 @@ export class answerController {
   async handleUserAnswer(
     @Req() req: any,
     @Body() answerData: AnswerDto
-  ): Promise<{ message: string, data: any, recommendation: string }> { 
+  ): Promise<{ message: string, data: any }> { 
+  // ): Promise<{ message: string, data: any, recommendation: string }> { 
     
-    try {
+    // try {
       // 1. 쿠키에서 sessionId 추출 (없을 경우 DTO에 담긴 값 사용)
       // main.ts의 session name과 일치해야 함
       const sessionIdFromCookie = req.cookies?.['anon_session_id'] || req.sessionID;
@@ -39,24 +40,25 @@ export class answerController {
       this.logger.log(`Saving answer and generating recommendation for session: ${finalData.sessionId}`);
       
       // 3. AnswerService의 create 메서드를 호출하여 MongoDB에 저장
-      const [savedDocument, geminiResult] = await Promise.all([
+      const [savedDocument] = await Promise.all([
+      // const [savedDocument, geminiResult] = await Promise.all([
         this.answerService.create(finalData as any),
-        this.commonService.generateMenuRecommendation(answerData as any)
+        // this.commonService.generateMenuRecommendation(answerData as any)
       ]);
-      console.log(geminiResult);
+      // console.log(geminiResult);
       // const savedDocument = await this.answerService.create(answerData);
       // const savedDocument = await this.answerService.create(finalData as any);
 
       return {
         message: '성공적으로 저장 및 메뉴 추천이 완료되었습니다.',
-        data: savedDocument,
-        recommendation: geminiResult.text
+        data: savedDocument
+        // , recommendation: geminiResult.text
       };
 
-    } catch (error) {
-        const err = error as Error; 
-        this.logger.error('🚨 MongoDB 저장 중 심각한 오류 발생:', err.message, err.stack);
-        throw error; 
-    }
+    // } catch (error) {
+    //     const err = error as Error; 
+    //     this.logger.error('🚨 MongoDB 저장 중 심각한 오류 발생:', err.message, err.stack);
+    //     throw error; 
+    // }
   }
 }
