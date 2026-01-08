@@ -2,7 +2,7 @@ import { Body, Controller, Post } from '@nestjs/common'
 import { GenerateTextDto } from '../dto/generate-text.dto'
 import { CommonService } from '../services/common.service'
 
-@Controller('api/common')
+@Controller('common')
 export class CommonController {
   constructor(private readonly commonService: CommonService) {}
 
