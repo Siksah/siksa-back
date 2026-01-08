@@ -22,10 +22,10 @@ export class Answer {
   temperature?: Record<string, any>;
 
   @Prop({ type: Object })
-  speed?: Record<string, any>;
+  avoid?: Record<string, any>;
 
   @Prop({ type: Object })
-  atmosphere?: Record<string, any>;
+  aftermeal?: Record<string, any>;
 
   @Prop()
   Result_Type?: string;

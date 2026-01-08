@@ -26,11 +26,11 @@ export class AnswerDto {
 
     @IsOptional()
     @IsString()
-    speed?: string;
+    avoid?: string;
 
     @IsOptional()
     @IsString()
-    atmosphere?: string;
+    aftermeal?: string;
 
     @IsOptional()
     @IsString()
