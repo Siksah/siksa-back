@@ -21,8 +21,10 @@ export function applyModelDefaults(reqType: string, dto: GenerateTextDto) {
   if (reqType === 'text') {
     const { model, prompt, config } = dto
     const thinkingLevel = config?.thinkingLevel ?? ThinkingLevel.LOW
-    const thinkingBudget = config?.thinkingBudget ?? -1
-    const temperature = config?.temperature ?? 1.0
+    // const thinkingBudget = config?.thinkingBudget ?? -1
+    // const temperature = config?.temperature ?? 1.0
+    const thinkingBudget = config?.thinkingBudget ?? 0 // Thinking 기능 끄기
+    const temperature = config?.temperature ?? 0.2;
 
     const result: GenerateContentParameters = {
       model: model,
@@ -84,6 +86,7 @@ export class GeminiUtil {
     let response: AsyncGenerator<GenerateContentResponse> | undefined
     try {
       response = await this.genAI.models.generateContentStream(params)
+      this.logger.debug(`response: ${response}`)
     } catch (error) {
       this.logger.error(error)
       throw error
@@ -104,5 +107,36 @@ export class GeminiUtil {
     this.logger.debug(`time: ${endTime - startTime}`)
 
     return { text: fullText, metaData, time: endTime - startTime }
+  }
+
+
+  async generateText2(reqData: GenerateTextDto): Promise<{ text: string; metaData?: UsageMetadata; time?: number }> {
+    const params = applyModelDefaults('text', reqData);
+    this.logger.debug(`params: ${safeStringify(params)}`);
+
+    const startTime = Date.now();
+    
+    try {
+      // 1. stream 방식이 아닌 단일 응답(generateContent)을 호출합니다.
+      const result = await this.genAI.models.generateContent(params);
+      
+      // 2. 응답에서 텍스트와 메타데이터를 직접 추출합니다.
+      // .text()는 메서드이므로 실행()이 필요할 수 있으나, SDK 버전에 따라 다를 수 있습니다.
+      const fullText = result.text || '';
+      const metaData = result.usageMetadata;
+      const endTime = Date.now();
+
+      this.logger.debug(`metaData: ${safeStringify(metaData)}`);
+      this.logger.debug(`time: ${endTime - startTime}`);
+
+      return { 
+        text: fullText, 
+        metaData, 
+        time: endTime - startTime 
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
   }
 }

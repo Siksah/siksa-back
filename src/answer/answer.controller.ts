@@ -29,12 +29,16 @@ export class answerController {
       this.logger.log(`Saving answerData : ${JSON.stringify(answerData)}`);
 
       // 사용자 답변 저장
+      let startTime = Date.now();
       const savedAnswer = await this.answerService.create(answerData);
-      this.logger.log(`[성공] 답변 저장 완료 - ID: ${savedAnswer._id}`);
+      let endTime = Date.now();
+      this.logger.log(`[성공] 답변 저장 완료 - ID: ${savedAnswer._id}, 처리 시간 : ${endTime - startTime}`);
       
       // Gemini 메뉴 추천 호출 (AI 로직)
+      startTime = Date.now();
       const geminiResult = await this.commonService.generateMenuRecommendation(answerData as any);
-      this.logger.log(`[성공] 메뉴 추천 완료 : ${geminiResult}`);
+      endTime = Date.now();
+      this.logger.log(`[성공] 메뉴 추천 완료, 처리 시간 : ${endTime - startTime}`);
 
       // geminiResult가 문자열일 경우를 대비한 recommendations 추출 로직
       // CommonService에서 이미 JSON.parse를 했다면 그대로 사용하고, 
@@ -44,7 +48,6 @@ export class answerController {
       try {
         // 백틱(```json)이나 불필요한 공백을 제거하고 파싱
         const cleanJson = geminiResult.text.replace(/```json|```/g, '').trim();
-        this.logger.log(`[성공] cleanJson: ${cleanJson}`);
         const parsedData = JSON.parse(cleanJson);
         
         // JSON 구조가 { "recommendations": [...] } 인지 아니면 바로 배열인지 체크

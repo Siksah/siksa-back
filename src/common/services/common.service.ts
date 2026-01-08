@@ -12,7 +12,7 @@ export class CommonService {
   constructor(private readonly geminiUtil: GeminiUtil) {}
 
   async generateText(dto: GenerateTextDto): Promise<{ text: string; metaData?: any; time?: number }> {
-    const { text, metaData, time } = await this.geminiUtil.generateText(dto)
+    const { text, metaData, time } = await this.geminiUtil.generateText2(dto)
 
     this.logger.debug(`dto: ${safeStringify(dto)}`)
     this.logger.debug(`text: ${text}`)
@@ -36,22 +36,20 @@ export class CommonService {
       .reduce((obj, [key, value]) => {
       const map = LUNCH_PROMPT_MAPS[key];
       // 매핑 데이터가 있으면 변환된 값을, 없으면 원본 값을 저장
-      obj[key] = (map && map[value]) ? map[value] : value;
+      obj[key] = map ? map[value] : value;
       return obj;
     }, {});
 
-    // 2. 가공된 객체를 JSON 문자열로 변환
-  const inputJson = JSON.stringify(filteredContext, null, 2);
-  this.logger.log(`inputJson: ${inputJson}`);
+    const jsonContext = JSON.stringify(filteredContext, null, 2);
 
-    const fullPrompt = `
+  const fullPrompt = `
 ${MENU_RECOMMENDATION_SYSTEM_PROMPT}
 
 # 입력 태그(JSON)
-${JSON.stringify(inputJson, null, 2)}
+${jsonContext}
   `;
 
-    this.logger.log(`fullPrompt: ${fullPrompt}`);
+    this.logger.log(`filteredContext: ${jsonContext}`);
     return this.generateText({
       prompt: fullPrompt,
       model: 'gemini-2.5-flash',
