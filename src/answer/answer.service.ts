@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Answer, AnswerDocument } from './schemas/answer.schema';
 import { AnswerDto } from './dto/answer.dto';
+import { Recommendation, RecommendationDocument } from './schemas/recommendation.schema';
 
 @Injectable()
 export class AnswerService {
   // Answer 모델 주입
   constructor(
     @InjectModel(Answer.name) private answerModel: Model<AnswerDocument>,
+    @InjectModel(Recommendation.name) private recommendationModel: Model<RecommendationDocument>,
   ) {}
 
   /**
@@ -24,4 +26,21 @@ export class AnswerService {
     
     return createdAnswer.save();
   }
+
+  /**
+   * MongoDB에 사용자 응답 데이터를 저장합니다.
+   * @param recommendationData 프론트엔드에서 받은 recommendationData
+   */
+  async saveRecommendation(recommendationData: any): Promise<any> {
+    
+    const newRecommendation = new this.recommendationModel({
+      answerId: recommendationData.answerId,
+      sessionId: recommendationData.sessionId,
+      items: recommendationData.items, // Gemini가 준 JSON 배열
+    });
+    
+    return await newRecommendation.save();
+  }
+
+
 }

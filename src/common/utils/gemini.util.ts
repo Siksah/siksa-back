@@ -50,6 +50,7 @@ export function applyModelDefaults(reqType: string, dto: GenerateTextDto) {
           thinkingBudget: thinkingBudget,
         },
         temperature: temperature,
+        responseMimeType: "application/json", // Gemini가 JSON만 생성하도록 강제
       }
     }
     return result

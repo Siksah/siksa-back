@@ -26,15 +26,19 @@ export class CommonService {
   }
 
   async generateMenuRecommendation(answers: Record<string, string>) {
+    // 제외할 키 리스트
+    const EXCLUDE_KEYS = ['sessionId', 'Result_Type', 'timestamp'];
+
     // 답변 ID들을 기반으로 Gemini에게 전달할 문장 조립
     const userContext = Object.entries(answers)
-      // .map(([key, value]) => {
-      //   const map = LUNCH_PROMPT_MAPS[key];
-      //   return map ? `- ${key}: ${map[value]}` : `- ${key}: ${value}`;
-      // })
-      // .join('\n');
-
-      console.log('userContext', userContext);
+    .filter(([key]) => !EXCLUDE_KEYS.includes(key)) // 불필요한 키 제외
+      .map(([key, value]) => {
+        const map = LUNCH_PROMPT_MAPS[key];
+        const displayValue = (map && map[value]) ? map[value] : value;
+        console.log(displayValue);
+        return map ? `- ${key}: ${map[value]}` : `- ${key}: ${value}`;
+      })
+      .join('\n');
 
     const fullPrompt = `
   당신은 최고의 메뉴 추천 가이드입니다. 
@@ -43,13 +47,23 @@ export class CommonService {
   [사용자 취향]
   ${userContext}
 
-  추천할 때는 각 메뉴를 선택한 이유를 사용자의 취향과 연결해서 친절하게 설명해주세요.
+  반드시 아래 JSON 형식으로만 응답하세요. 다른 설명이나 인삿말은 생략하세요:
+  {
+    "recommendations": [
+      { 
+        "rank": 1, 
+        "menu": "메뉴명", 
+        "category": "일식/한식/중식 등",
+      },
+      ... (3순위까지)
+    ]
+  }
     `;
 
     console.log('fullPrompt', fullPrompt);
-    return this.geminiUtil.generateText({
+    return this.generateText({
       prompt: fullPrompt,
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
     });
   }
 }

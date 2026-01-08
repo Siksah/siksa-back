@@ -22,43 +22,64 @@ export class answerController {
   async handleUserAnswer(
     @Req() req: any,
     @Body() answerData: AnswerDto
-  ): Promise<{ message: string, data: any }> { 
-  // ): Promise<{ message: string, data: any, recommendation: string }> { 
+  // ): Promise<{ message: string, data: any }> { 
+  ): Promise<{ message: string; data: any; savedAnswer: any; recommendation: any; answerId: string }> {
     
-    // try {
-      // 1. 쿠키에서 sessionId 추출 (없을 경우 DTO에 담긴 값 사용)
-      // main.ts의 session name과 일치해야 함
-      const sessionIdFromCookie = req.cookies?.['anon_session_id'] || req.sessionID;
+    try {
+      this.logger.log(`Saving answerData : ${JSON.stringify(answerData)}`);
 
-      console.log('sessionIdFromCookie', sessionIdFromCookie);
-      // 2. 데이터 보정 (DTO에 sessionId 주입)
-      const finalData = {
-        ...answerData,
-        sessionId: sessionIdFromCookie || answerData.sessionId, 
-      };
-
-      this.logger.log(`Saving answer and generating recommendation for session: ${finalData.sessionId}`);
+      // 사용자 답변 저장
+      const savedAnswer = await this.answerService.create(answerData);
+      this.logger.log(`[성공] 답변 저장 완료 - ID: ${savedAnswer._id}`);
       
-      // 3. AnswerService의 create 메서드를 호출하여 MongoDB에 저장
-      const [savedDocument] = await Promise.all([
+      // Gemini 메뉴 추천 호출 (AI 로직)
+      const geminiResult = await this.commonService.generateMenuRecommendation(answerData as any);
+      this.logger.log(`[성공] 메뉴 추천 완료 : ${geminiResult}`);
+
+      // geminiResult가 문자열일 경우를 대비한 recommendations 추출 로직
+      // CommonService에서 이미 JSON.parse를 했다면 그대로 사용하고, 
+      // 아니라면 여기서 파싱 처리가 필요
+      let recommendations = [];
+
+      try {
+        // 백틱(```json)이나 불필요한 공백을 제거하고 파싱
+        const cleanJson = geminiResult.text.replace(/```json|```/g, '').trim();
+        this.logger.log(`[성공] cleanJson: ${cleanJson}`);
+        const parsedData = JSON.parse(cleanJson);
+        
+        // JSON 구조가 { "recommendations": [...] } 인지 아니면 바로 배열인지 체크
+        recommendations = parsedData.recommendations || (Array.isArray(parsedData) ? parsedData : []);
+      } catch (parseError) {
+        this.logger.error('Gemini 결과 파싱 실패:', geminiResult.text);
+        // 파싱 실패 시 빈 배열이나 기본 메시지 처리
+      }
+
+      // 추천 결과 저장
+      // 발급받은 savedAnswer._id를 사용하여 추천 결과를 별도 저장
+      const savedRecommendation = await this.answerService.saveRecommendation({
+        answerId: savedAnswer._id, // 핵심: 두 데이터를 연결하는 고리
+        sessionId: answerData.sessionId,
+        items: recommendations
+      });
+      this.logger.log(`[성공] 추천 데이터 저장 완료 - ID: ${savedRecommendation._id}`);
+        
       // const [savedDocument, geminiResult] = await Promise.all([
-        this.answerService.create(finalData as any),
-        // this.commonService.generateMenuRecommendation(answerData as any)
-      ]);
-      // console.log(geminiResult);
-      // const savedDocument = await this.answerService.create(answerData);
-      // const savedDocument = await this.answerService.create(finalData as any);
+      //   this.answerService.create(answerData as any),
+      //   this.commonService.generateMenuRecommendation(answerData as any)
+      // ]);
 
       return {
         message: '성공적으로 저장 및 메뉴 추천이 완료되었습니다.',
-        data: savedDocument
-        // , recommendation: geminiResult.text
+        data: answerData,
+        answerId: savedAnswer._id.toString(),
+        savedAnswer: savedAnswer,
+        recommendation: recommendations,
       };
 
-    // } catch (error) {
-    //     const err = error as Error; 
-    //     this.logger.error('🚨 MongoDB 저장 중 심각한 오류 발생:', err.message, err.stack);
-    //     throw error; 
-    // }
+    } catch (error) {
+        const err = error as Error; 
+        this.logger.error('처리 중 오류 발생:', err.message, err.stack);
+        throw error; 
+    }
   }
 }
