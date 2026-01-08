@@ -3,6 +3,7 @@ import { GeminiUtil } from '../utils/gemini.util'
 import { GenerateTextDto } from '../dto/generate-text.dto'
 import { safeStringify } from '../utils/utils'
 import { LUNCH_PROMPT_MAPS } from '../constants/lunch-data';
+import { MENU_RECOMMENDATION_SYSTEM_PROMPT } from '../constants/prompts';
 
 @Injectable()
 export class CommonService {
@@ -30,37 +31,27 @@ export class CommonService {
     const EXCLUDE_KEYS = ['sessionId', 'Result_Type', 'timestamp'];
 
     // 답변 ID들을 기반으로 Gemini에게 전달할 문장 조립
-    const userContext = Object.entries(answers)
-    .filter(([key]) => !EXCLUDE_KEYS.includes(key)) // 불필요한 키 제외
-      .map(([key, value]) => {
-        const map = LUNCH_PROMPT_MAPS[key];
-        const displayValue = (map && map[value]) ? map[value] : value;
-        console.log(displayValue);
-        return map ? `- ${key}: ${map[value]}` : `- ${key}: ${value}`;
-      })
-      .join('\n');
+    const filteredContext = Object.entries(answers)
+      .filter(([key]) => !EXCLUDE_KEYS.includes(key)) // 불필요한 키 제외
+      .reduce((obj, [key, value]) => {
+      const map = LUNCH_PROMPT_MAPS[key];
+      // 매핑 데이터가 있으면 변환된 값을, 없으면 원본 값을 저장
+      obj[key] = (map && map[value]) ? map[value] : value;
+      return obj;
+    }, {});
+
+    // 2. 가공된 객체를 JSON 문자열로 변환
+  const inputJson = JSON.stringify(filteredContext, null, 2);
+  this.logger.log(`inputJson: ${inputJson}`);
 
     const fullPrompt = `
-  당신은 최고의 메뉴 추천 가이드입니다. 
-  다음과 같은 사용자의 상황과 취향을 분석하여 점심 메뉴 3가지를 추천해주세요.
+${MENU_RECOMMENDATION_SYSTEM_PROMPT}
 
-  [사용자 취향]
-  ${userContext}
+# 입력 태그(JSON)
+${JSON.stringify(inputJson, null, 2)}
+  `;
 
-  반드시 아래 JSON 형식으로만 응답하세요. 다른 설명이나 인삿말은 생략하세요:
-  {
-    "recommendations": [
-      { 
-        "rank": 1, 
-        "menu": "메뉴명", 
-        "category": "일식/한식/중식 등",
-      },
-      ... (3순위까지)
-    ]
-  }
-    `;
-
-    console.log('fullPrompt', fullPrompt);
+    this.logger.log(`fullPrompt: ${fullPrompt}`);
     return this.generateText({
       prompt: fullPrompt,
       model: 'gemini-2.5-flash',
