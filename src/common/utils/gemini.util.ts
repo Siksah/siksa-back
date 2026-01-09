@@ -21,7 +21,7 @@ export function applyModelDefaults(reqType: string, dto: GenerateTextDto) {
   if (reqType === 'text') {
     const { model, prompt, config } = dto
     const thinkingLevel = config?.thinkingLevel ?? ThinkingLevel.LOW
-    const thinkingBudget = config?.thinkingBudget ?? -1
+    const thinkingBudget = config?.thinkingBudget ?? 1024
     const temperature = config?.temperature ?? 1.0
     // const thinkingBudget = config?.thinkingBudget ?? 0 // Thinking 기능 끄기
     // const temperature = config?.temperature ?? 0.2;
