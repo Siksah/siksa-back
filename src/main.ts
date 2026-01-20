@@ -66,10 +66,10 @@ async function bootstrap() {
       name: 'anon_session_id', // 쿠키 이름 통일
       secret: SESSION_SECRET, // 세션 암호화 키
       resave: false,
-      saveUninitialized: true, // 익명 세션을 위해 필수: 요청이 들어왔을 때 세션에 아무 데이터가 없더라도 저장
+      saveUninitialized: false, // 익명 세션을 위해 필수: 요청이 들어왔을 때 세션에 아무 데이터가 없더라도 저장
       store: store,
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 1주일
+        maxAge: 1000 * 60 * 30, // 30분
         httpOnly: true, // XSS 공격 방지
         secure: process.env.NODE_ENV === 'production', // HTTPS에서만 true
         sameSite: 'lax',

@@ -65,6 +65,7 @@ export class SessionController {
     try {
       const clientIp = req.ip;
       const initialData = { ip: clientIp, url: req.url }; // 익명 세션의 초기 데이터
+      const createdAt = new Date().toISOString();
   
       // 1. 세션 ID 생성 및 MongoDB에 TTL과 함께 저장
       const sessionId = await this.sessionsService.createSession(initialData);
@@ -78,7 +79,13 @@ export class SessionController {
         path: '/', // 전체 경로에서 쿠키 유효
       });
       this.logger.log(`Session created for IP: ${clientIp}`);
-      return { message: 'Session created', sessionId };
+      return { 
+        message: 'Session created', 
+        data: { 
+          sessionId, 
+          createdAt
+        } 
+      };
     } catch (error) {
       this.logger.error('Session creation failed', error);
       throw error;

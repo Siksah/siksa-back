@@ -9,32 +9,7 @@ export class AnswerDto {
     sessionId?: string;
 
     @IsOptional()
-    @IsString()
-    'party-size'?: string;
-
-    @IsOptional()
-    @IsString()
-    taste?: string;
-
-    @IsOptional()
-    @IsString()
-    texture?: string;
-
-    @IsOptional()
-    @IsString()
-    temperature?: string;
-
-    @IsOptional()
-    @IsString()
-    avoid?: string;
-
-    @IsOptional()
-    @IsString()
-    aftermeal?: string;
-
-    @IsOptional()
-    @IsString()
-    Result_Type?: string;
+    answers?: any;
 
     @IsNotEmpty()
     @IsISO8601()

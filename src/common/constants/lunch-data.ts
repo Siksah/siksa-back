@@ -47,10 +47,10 @@ export const AFTERMEAL_MAP = {
  * 모든 맵을 하나로 묶어 관리 (Service에서 접근 용이)
  */
 export const LUNCH_PROMPT_MAPS = {
-  'party-size': PARTY_SIZE_MAP,
-  taste: TASTE_MAP,
-  texture: TEXTURE_MAP,
-  temperature: TEMPERATURE_MAP,
-  avoid: AVOID_MAP,
-  aftermeal: AFTERMEAL_MAP,
+  '1': PARTY_SIZE_MAP,
+  '2': TASTE_MAP,
+  '3': TEXTURE_MAP,
+  '4': TEMPERATURE_MAP,
+  '5': AVOID_MAP,
+  '6': AFTERMEAL_MAP,
 };

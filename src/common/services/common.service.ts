@@ -27,25 +27,27 @@ export class CommonService {
   }
 
   async generateMenuRecommendation(answers: Record<string, string>) {
-    // 제외할 키 리스트
-    const EXCLUDE_KEYS = ['sessionId', 'Result_Type', 'timestamp'];
-
-    // 답변 ID들을 기반으로 Gemini에게 전달할 문장 조립
-    const filteredContext = Object.entries(answers)
-      .filter(([key]) => !EXCLUDE_KEYS.includes(key)) // 불필요한 키 제외
-      .reduce((obj, [key, value]) => {
-      const map = LUNCH_PROMPT_MAPS[key];
-      // 매핑 데이터가 있으면 변환된 값을, 없으면 원본 값을 저장
-      obj[key] = map ? map[value] : value;
-      return obj;
+    this.logger.log(`answers: ${answers}`);
+      
+    // 불필요한 키는 필터링하고 label만 추출
+    const extractedValues = Object.entries(answers)
+    .filter(([key]) => !['sessionId', 'timestamp', 'Result_Type'].includes(key))
+    .reduce((acc, [key, value]: [string, any]) => {
+      
+      if (key === 'answers') {
+        Object.entries(value as Record<string, any>).forEach(([subKey, content]) => {
+          acc[subKey] = content.value;
+        });
+      }
+      return acc;
     }, {});
+    this.logger.log(`extractedValues: ${extractedValues}`);
 
-    const jsonContext = JSON.stringify(filteredContext, null, 2);
+    const jsonContext = JSON.stringify(extractedValues, null, 2);
 
   const fullPrompt = `
 ${MENU_RECOMMENDATION_SYSTEM_PROMPT}
 
-# 입력 태그(JSON)
 ${jsonContext}
   `;
 
