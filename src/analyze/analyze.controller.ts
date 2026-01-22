@@ -1,15 +1,17 @@
-import { Controller, Post, Body, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, Logger, HttpCode, HttpStatus } from '@nestjs/common';
 import { AnalyzeService } from './analyze.service';
 import { CreateFeedbackDto } from './dto/feedback.dto';
 
 // 통계 관련 
 @Controller()
 export class AnalyzeController {
+  private readonly log = new Logger(AnalyzeController.name);
   constructor(private readonly analyzeService: AnalyzeService) {}
 
   @Post('feedback')
   @HttpCode(HttpStatus.CREATED)
   async saveFeedback(@Body() dto: CreateFeedbackDto) {
+    this.log.log('saveFeedback dto', dto);
     // 1. 필수 값 검증 (간단한 예시)
     if (!dto.sessionId || !dto.feedback) {
       throw new BadRequestException('sessionId and feedback are required');
@@ -18,10 +20,10 @@ export class AnalyzeController {
     // 2. 서비스 레이어를 통해 MongoDB에 저장
     try {
       const result = await this.analyzeService.recordFeedback(dto);
+      this.log.log('result', result);
       return {
         success: true,
-        message: 'Feedback recorded successfully',
-        data: result,
+        result,
       };
     } catch (error) {
       throw new BadRequestException('Failed to save feedback data');

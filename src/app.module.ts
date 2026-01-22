@@ -8,6 +8,7 @@ import { AnswerModule } from './answer/answer.module';
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { SessionsModule } from './session/sessions.module';
+import { AnalyzeModule } from './analyze/analyze.module';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { SessionsModule } from './session/sessions.module';
     //   serveRoot: '/api-test',
     // }),
 
-    CommonModule, AnswerModule, SessionsModule,
+    CommonModule, AnswerModule, SessionsModule, AnalyzeModule
   ],
 
   controllers: [AppController],

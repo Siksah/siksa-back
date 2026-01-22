@@ -1,15 +1,27 @@
-// analyze/dto/feedback.dto.ts
+import { IsNotEmpty, IsString, IsOptional, IsISO8601, IsIn, IsObject } from 'class-validator';
+
 export class CreateFeedbackDto {
+  @IsNotEmpty()
+  @IsString()
   sessionId!: string;
-  menuName!: string;     
-  rank!: number;
+
+  @IsNotEmpty()
+  @IsString()
+  retryCount!: string;
+
+  @IsOptional() // 기기 정보는 누락될 수도 있으므로 Optional 처리
+  @IsObject()
+  device?: any;
+
+  @IsNotEmpty()
+  @IsObject()
+  result!: any;
+
+  @IsNotEmpty()
+  @IsIn(['like', 'dislike']) // 지정된 값만 허용
   feedback!: 'like' | 'dislike';
-  thinkingBudget!: number;
-  deviceInfo!: {
-    os: string;
-    browser: string;
-    isMobile: boolean;
-    screenSize: string;
-  };
-  retryCount!: number;
+  
+  @IsNotEmpty()
+  @IsISO8601()
+  timestamp!: string;
 }

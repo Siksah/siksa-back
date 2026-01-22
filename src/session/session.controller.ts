@@ -78,13 +78,11 @@ export class SessionController {
         sameSite: 'lax',
         path: '/', // 전체 경로에서 쿠키 유효
       });
-      this.logger.log(`Session created for IP: ${clientIp}`);
+      this.logger.log(`Session created for IP: ${clientIp}, ${sessionId}`);
       return { 
         message: 'Session created', 
-        data: { 
-          sessionId, 
-          createdAt
-        } 
+        sessionId, 
+        createdAt
       };
     } catch (error) {
       this.logger.error('Session creation failed', error);

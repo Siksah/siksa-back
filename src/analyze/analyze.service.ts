@@ -1,27 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common';
-// import { InjectModel } from '@nestjs/mongoose'; // 스키마 생성 후 주입 필요
-// import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose'; // 스키마 생성 후 주입 필요
+import { Model } from 'mongoose';
 
 @Injectable()
 export class AnalyzeService {
   private readonly logger = new Logger(AnalyzeService.name);
 
-  // constructor(
-  //   @InjectModel('Feedback') private feedbackModel: Model<any>,
-  //   @InjectModel('ActionLog') private actionLogModel: Model<any>,
-  // ) {}
+  constructor(
+    @InjectModel('Feedback') private feedbackModel: Model<any>,
+    // @InjectModel('ActionLog') private actionLogModel: Model<any>,
+  ) {}
 
   /**
    * 메뉴 추천 결과에 대한 좋아요/싫어요 데이터 저장
    */
   async recordFeedback(dto: any) {
     try {
-      this.logger.log(`Recording feedback: ${dto.menuName} - ${dto.feedback}`);
+      this.logger.log('recordFeedback dto:', dto);
       
-      // TODO: const newFeedback = new this.feedbackModel(dto);
-      // return await newFeedback.save();
+      const newFeedback = new this.feedbackModel(dto);
+      return newFeedback.save();
       
-      return { success: true, recordedAt: new Date() };
     } catch (error) {
         
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';

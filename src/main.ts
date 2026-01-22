@@ -8,13 +8,31 @@ import { winstonLogger } from './common/utils/winston.config'
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import * as expressSession from 'express-session';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
 
 const session = require('express-session');
 const MongoStore = require('connect-mongodb-session');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: winstonLogger,
+    logger: WinstonModule.createLogger({
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.colorize(),
+            winston.format.printf(({ timestamp, level, message, ...meta }) => {
+              // 메타데이터(객체)가 있으면 문자열로 변환, 없으면 빈 문자열
+              const metaStr = Object.keys(meta).length 
+                ? `\n${JSON.stringify(meta, null, 2)}` 
+                : '';
+              return `[${timestamp}] ${level}: ${message}${metaStr}`;
+            }),
+          ),
+        }),
+      ],
+    }),
   })
 
   // 모든 API 경로 앞에 /api를 자동으로 붙입니다.
@@ -33,6 +51,8 @@ async function bootstrap() {
      origin: [ // '*', null,
         'http://localhost:5173',       // 1. 로컬호스트 (Vite 기본 포트 예시)
         'http://127.0.0.1:5173',       // 1-1. 로컬호스트 IP 표기
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
         'https://www.nyamnyam.kr',
         'https://nyamnyam.kr',
     //    // 2. 내 내부 IP port 3000,3001, 5173
