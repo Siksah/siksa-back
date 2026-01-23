@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { answerController } from './answer.controller';
+import { AnswerController } from './answer.controller';
 import { AnswerService } from './answer.service';
 import { Answer, AnswerSchema } from './schemas/answer.schema';
 import { CommonModule } from '../common/common.module';
@@ -14,7 +14,7 @@ import { Recommendation, RecommendationSchema } from './schemas/recommendation.s
     ]),
     CommonModule,
   ],
-  controllers: [answerController], // AppController 등록
+  controllers: [AnswerController], // AppController 등록
   providers: [AnswerService],
 })
 export class AnswerModule {}

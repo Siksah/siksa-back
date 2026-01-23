@@ -7,9 +7,9 @@ import { CommonService } from '../common/services/common.service';
 const SESSION_COOKIE_NAME = 'anon_session_id';
 
 @Controller() // 기본 경로 (prefix 없음)
-export class answerController {
+export class AnswerController {
   // 로거 인스턴스를 사용하여 깔끔하게 콘솔에 출력합니다.
-  private readonly logger = new Logger(answerController.name);
+  private readonly logger = new Logger(AnswerController.name);
 
  // 1. AnswerService 주입 (필수!)
   constructor(
