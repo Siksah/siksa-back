@@ -29,7 +29,7 @@ COPY --from=builder /app/package*.json .
 COPY --from=builder /app/dist ./dist 
 
 # 컨테이너의 내부 포트
-EXPOSE 3001 
+EXPOSE 8080
 
 # 컨테이너 실행 명령 (docker-compose.yml의 command가 최종적으로 덮어씁니다.)
 CMD [ "npm", "run", "start:prod" ]

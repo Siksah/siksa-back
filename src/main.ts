@@ -99,7 +99,8 @@ async function bootstrap() {
   
 
   // 3. 앱 리스닝 시작 (프론트엔드에서 설정한 포트 3001을 사용)
-  await app.listen(3001)
+  // await app.listen(3001)
+  app.listen(process.env.PORT || 8080)
   console.log(`Application is running on: ${await app.getUrl()}`)
 }
 bootstrap()
