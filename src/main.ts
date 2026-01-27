@@ -55,6 +55,7 @@ async function bootstrap() {
         'http://127.0.0.1:3000',
         'https://www.nyamnyam.kr',
         'https://nyamnyam.kr',
+        'https://siksa-frontend-750045356743.asia-northeast3.run.app',
     //    // 2. 내 내부 IP port 3000,3001, 5173
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
