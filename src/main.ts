@@ -48,7 +48,7 @@ async function bootstrap() {
 
   // React 앱의 주소를 허용하는 CORS 설정
   app.enableCors({
-     origin: [ // '*', null,
+     origin: [
         'http://localhost:5173',       // 1. 로컬호스트 (Vite 기본 포트 예시)
         'http://127.0.0.1:5173',       // 1-1. 로컬호스트 IP 표기
         'http://localhost:3000',
@@ -56,7 +56,6 @@ async function bootstrap() {
         'https://www.nyamnyam.kr',
         'https://nyamnyam.kr',
         'https://siksa-frontend-750045356743.asia-northeast3.run.app',
-    //    // 2. 내 내부 IP port 3000,3001, 5173
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
@@ -99,9 +98,8 @@ async function bootstrap() {
   );
   
 
-  // 3. 앱 리스닝 시작 (프론트엔드에서 설정한 포트 3001을 사용)
-  // await app.listen(3001)
-  app.listen(process.env.PORT || 8080, '0.0.0.0')
+  const port = process.env.PORT || 8080;
+  await app.listen(port, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`)
 }
 bootstrap()
