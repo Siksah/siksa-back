@@ -92,7 +92,7 @@ async function bootstrap() {
         maxAge: 1000 * 60 * 30, // 30분
         httpOnly: true, // XSS 공격 방지
         secure: process.env.NODE_ENV === 'production', // HTTPS에서만 true
-        sameSite: 'lax',
+        sameSite: 'none', // lax
       },
     } as expressSession.SessionOptions),
   );
