@@ -98,8 +98,9 @@ async function bootstrap() {
   );
   
 
-  const port = process.env.PORT || 8080;
+  const port = process.env.PORT || 3001; // 배포시엔 PORT(8080) 사용, 로컬에선 3001 사용
   await app.listen(port, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`)
+  console.log('process.env.PORT: ', process.env.PORT)
 }
 bootstrap()
