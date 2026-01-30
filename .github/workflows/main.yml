@@ -23,49 +23,34 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 1. Docker Hub 로그인
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      # 2. GCP 인증 (Secrets에 등록한 JSON 키 사용)
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
-      # 2. Docker 빌드 환경 설정
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      # 3. 백엔드 이미지 빌드 및 푸시 (siksa-backend-app)
-      - name: Build and Push Backend Image
-        # siksa-back 폴더에 변경이 있을 때만 실행
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./dockerfiles/backend.Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/siksa-backend-app:latest 
-          cache-from: type=gha 
-          cache-to: type=gha,mode=max 
+      # 3. gcloud SDK 설정
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
 
-      # 4. SSH를 통해 VM 접속 및 이미지 pull/실행
-      - name: Deploy Containers on VM via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VM_HOST_IP }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "--- Navigating to deployment directory ---"
-            cd ${{ secrets.VM_TARGET_DIR }}
-            
-            # 6. VM에서 Docker Hub 로그인
-            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-            
-            # 7. 이미지 다운로드 (pull)
-            echo "--- Pulling latest images from Docker Hub ---"
-            /usr/local/bin/docker-compose pull
-            
-            # 8. 컨테이너 실행 (--no-build 옵션으로 빌드를 건너뜁니다)
-            echo "--- Starting containers with latest images ---"
-            /usr/local/bin/docker-compose up -d --force-recreate --no-build
-            
-            echo "--- Deployment complete ---"
+      # 4. Artifact Registry 인증 (Docker 로그인 대체)
+      - name: 'Docker Auth'
+        run: |-
+          gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+
+      # 5. 빌드 및 Artifact Registry로 푸시
+      # 기존 Docker Hub 단계는 제거하고 GCP 저장소로 직접 빌드/푸시합니다.
+      - name: Build and Push to Artifact Registry
+        run: |
+          docker build -t asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/siksa/siksa-backend-app:latest -f ./dockerfiles/backend.Dockerfile .
+          docker push asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/siksa/siksa-backend-app:latest
+
+      # 6. Cloud Run 서비스 배포
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy siksa-backend \
+            --image asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/siksa/siksa-backend-app:latest \
+            --region asia-northeast1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080
