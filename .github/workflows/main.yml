@@ -36,21 +36,21 @@ jobs:
       # 4. Artifact Registry 인증 (Docker 로그인 대체)
       - name: 'Docker Auth'
         run: |-
-          gcloud auth configure-docker asia-northeast3-docker.pkg.dev
+          gcloud auth configure-docker asia-northeast1-docker.pkg.dev
 
       # 5. 빌드 및 Artifact Registry로 푸시
       # 기존 Docker Hub 단계는 제거하고 GCP 저장소로 직접 빌드/푸시합니다.
       - name: Build and Push to Artifact Registry
         run: |
-          docker build -t asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/siksa-back/backend:latest -f ./dockerfiles/backend.Dockerfile .
-          docker push asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/siksa-back/backend:latest
+          docker build -t asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/siksa/siksa-backend-app:latest -f ./dockerfiles/backend.Dockerfile .
+          docker push asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/siksa/siksa-backend-app:latest
 
       # 6. Cloud Run 서비스 배포
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy siksa-backend \
-            --image asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/siksa-back/backend:latest \
-            --region asia-northeast3 \
+            --image asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/siksa/siksa-backend-app:latest \
+            --region asia-northeast1 \
             --platform managed \
             --allow-unauthenticated \
             --port 8080
