@@ -27,7 +27,7 @@ export class CommonService {
   }
 
   async generateMenuRecommendation(answers: Record<string, string>) {
-    this.logger.log(`answers: ${answers}`);
+    this.logger.log('answers: ', answers);
       
     // 불필요한 키는 필터링하고 label만 추출
     const extractedValues = Object.entries(answers)
@@ -41,7 +41,7 @@ export class CommonService {
       }
       return acc;
     }, {});
-    this.logger.log(`extractedValues: ${extractedValues}`);
+    this.logger.log('extractedValues: ', extractedValues);
 
     const jsonContext = JSON.stringify(extractedValues, null, 2);
 

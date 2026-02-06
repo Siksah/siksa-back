@@ -48,6 +48,7 @@ export class AnswerController {
       try {
         // 백틱(```json)이나 불필요한 공백을 제거하고 파싱
         const cleanJson = geminiResult.text.replace(/```json|```/g, '').trim();
+        this.logger.log('메뉴 추천 데이터 : ', cleanJson);
         const parsedData = JSON.parse(cleanJson);
         
         // JSON 구조가 { "recommendations": [...] } 인지 아니면 바로 배열인지 체크
